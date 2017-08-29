@@ -53,6 +53,7 @@ export default class SideBar extends Component {
         </ul>
         <div className="SSreggi" style={{position:"relative", zIndex:900, top:"62%", left:"12%",background:"blue", height:"170px", width:"150px", color:"white"}}>
         </div>
+        <a href="/logout"><button>Logout</button></a>
       </div>
     )
   }

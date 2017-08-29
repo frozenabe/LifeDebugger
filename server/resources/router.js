@@ -2,13 +2,20 @@ const path = require('path');
 
 const isLoggedIn = (req, res, next) => {
   if (req.isAuthenticated()) {
+    res.redirect('./timeline');
+  }
+  next();
+}
+
+const isLoggedInTwo = (req, res, next) => {
+  if (req.isAuthenticated()) {
     return next();
   }
   res.redirect('/');
 }
     
 module.exports = function(app, passport) { 
-  app.get('/', (req, res) => {
+  app.get('/', isLoggedIn, (req, res) => {
     res.sendFile('/Users/Abe/git_codestates/projectOne/client/dist/index.html');
   });
 
@@ -16,15 +23,15 @@ module.exports = function(app, passport) {
     successRedirect : '/timeline',
     failureRedirect : '/',
     failureFlash : true,
-}));
+  }));
 
   app.post('/signup', passport.authenticate('local-signup', {
     successRedirect : '/timeline',
     failureRedirect : '/',
     failureFlash : true,
-}));
+  }));
 
-  app.get('/timeline', isLoggedIn, (req, res) => {
+  app.get('/timeline', isLoggedInTwo, (req, res) => {
     console.log('signup')
     res.sendFile('/Users/Abe/git_codestates/projectOne/client/src/timeline.html');
   });

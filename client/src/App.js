@@ -5,6 +5,9 @@ import containerResizeDetector from 'react-calendar-timeline/lib/resize-detector
 import SideBar from './components/sideBar';
 //import GroupColor from './components/groupColor';
 import ItemMenu from './components/itemMenu';
+import GroupMenu from './components/groupMenu';
+import AddGroupBtn from './components/addGroupBtn';
+
 
 const minTime = moment().add(-1, 'years').valueOf(); 
 const maxTime = moment().add(3, 'years').valueOf();
@@ -31,6 +34,7 @@ export default class App extends React.Component {
     const items = [];
     const groups = [];
     const deletedItems = [];
+    const deletedGroups = [];
 
     for (let i = 0; i < 13; i++) {
       items.push({
@@ -65,9 +69,11 @@ export default class App extends React.Component {
       groups,
       items,
       deletedItems,
+      deletedGroups,
       defaultTimeStart,
       defaultTimeEnd,
       selectedItem: null,
+      selectedGroup: null,
     };
   }
 
@@ -90,9 +96,20 @@ export default class App extends React.Component {
     });
   }
 
-  // addGroup = () => {
-  //   const time 
-  // }
+  addGroup = () => {
+    const {groups} = this.state;
+
+    this.setState({
+      groups: [
+        ...groups,
+        {
+          id: `${groups.length}`,
+          title: '',
+          tip: 'additional information',
+        },
+      ],
+    });
+  }
 
   handleCanvasClick = (groupId, time, event) => {
     console.log('Canvas clicked', groupId, time, event);
@@ -116,8 +133,8 @@ export default class App extends React.Component {
 
     if (event.keyCode === 13) {
       // REMOVE INPUT BOX ON ENTER
-      
-      const inputTitleValue = inputTitle.value || currentTitle.innerHTML;
+      const inputTitleValue = inputTitle.value || currentTitle.innerText;
+
       inputTitle.parentNode.removeChild(inputTitle);
       //this.inputNotShowing = true;
 
@@ -139,6 +156,38 @@ export default class App extends React.Component {
       currentTitle.style.display = "inline";
       trashCan.style.display = "none";
       this.clickedBefore = false;
+    };
+
+    return true;
+  }
+
+  enterKeyPressGroup = (clickEvent, groupId, currentTitle, copyCurrentTitle, event) => {
+    event = event || window.event;
+    const inputTitle = document.getElementById("inputGroup");
+    const inputTitleValue = inputTitle.value || copyCurrentTitle;
+   
+    if (event.keyCode === 13) {
+      console.log(currentTitle, copyCurrentTitle)
+      inputTitle.parentNode.removeChild(inputTitle);
+
+      currentTitle.innerText = inputTitleValue;
+      // SHOW CURRENTLY DISPLAYED TITLE
+      currentTitle.style.display = "inline";
+
+      // INSERT CHANGED TITLE INFO INTO ITEMS
+      const groups = this.state.groups.slice(0);
+      groups[groupId].title = inputTitleValue;
+      this.setState({ groups });
+      // RESET CLICKED BEFORE
+      this.groupClickedBefore = false;
+    };
+
+    if (event.keyCode === 27) {
+      inputTitle.parentNode.removeChild(inputTitle);
+      //this.inputNotShowing = true;
+      currentTitle.innerText = inputTitleValue;
+      currentTitle.style.display = "inline";
+      this.groupClickedBefore = false;
     };
 
     return true;
@@ -177,6 +226,37 @@ export default class App extends React.Component {
     console.log('Clicked: ' + itemId);
   }
 
+  handleGroupClick = (groupId, event) => {
+  // PUT INSIDE BAR IF CLICKED FOR THE FIRST TIME
+    if (!this.groupClickedBefore) {
+      const currentTitle = event.currentTarget;
+      const copyCurrentTitle = currentTitle.innerText.slice(0)
+
+      // CREATE INPUT ELEMENT
+      const inputDOM = document.createElement('input');
+      inputDOM.onkeydown = this.enterKeyPressGroup.bind(this, event, groupId, currentTitle, copyCurrentTitle);
+      inputDOM.setAttribute( "id" , "inputGroup");
+      inputDOM.setAttribute( "type", "text/javascipt" );
+      inputDOM.value = `${currentTitle.innerText}`;
+      console.log(inputDOM.value)
+      // HIDE ORIGINAL TITLE TO SHOW INPUT
+      console.log(event.currentTarget.childNodes[0])
+      currentTitle.innerText = '';
+
+      // PUT INPUT INSIDE DOM
+      event.currentTarget.prepend(inputDOM);
+      this.inputNotShowing = false;
+      this.groupClickedBefore = true;
+      
+      // HAVE BEEN CLICKED ONCE
+      //console.log(event.currentTarget)
+      this.setState({
+        selectedGroup: event.currentTarget,
+      });
+      //console.log(this.state.selectedItem.getBoundingClientRect());
+    }
+  }
+
   handleItemSelect = (itemId) => {
     console.log('Selected: ' + itemId);
   }
@@ -194,6 +274,22 @@ export default class App extends React.Component {
           : eachItem),
       selectedItem: null,
       deletedItems: updateDeletedItem,
+    });
+  }
+
+  handleGroupToDeletedGroups = (group) => {
+    const { groups, deletedGroups } = this.state;
+    const updateDeletedGroup = deletedGroups.slice(0);
+    updateDeletedGroup.push(group)
+    this.groupClickedBefore = false;
+    
+    this.setState({
+      groups: groups.map(eachGroup => 
+        eachGroup.id === group.id
+          ? {}
+          : eachGroup),
+      selectedGroup: null,
+      deletedGroups: updateDeletedGroup,
     });
   }
 
@@ -266,7 +362,7 @@ export default class App extends React.Component {
         </div>
         <ItemMenu 
           onPressTrashCan={this.handleItemToDeletedItems.bind(this, item)}
-          id={'itemMenu' + item.id}
+          id={"itemMenu" + item.id}
         />
       </div>
     )
@@ -274,8 +370,14 @@ export default class App extends React.Component {
 
   groupRenderer = ({ group }) => {
     return (
-      <div className="custom-group">
-        {group.title}
+      <div>  
+        <div className="custom-group" onClick={e => this.handleGroupClick(group.id, e)}>
+          {group.title}
+        </div>
+        <GroupMenu 
+          onPressTrashCanGroup={this.handleGroupToDeletedGroups.bind(this, group)}
+          id={"groupMenu" + group.id}
+        />
       </div>
     )
   }
@@ -285,6 +387,7 @@ export default class App extends React.Component {
 
     return (
       <div>
+        <AddGroupBtn addGroup={this.addGroup} />
         <SideBar
           addItem={this.addItem.bind(this)}
         />

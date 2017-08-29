@@ -60,7 +60,7 @@
 
 	var _App2 = _interopRequireDefault(_App);
 
-	var _registerServiceWorker = __webpack_require__(345);
+	var _registerServiceWorker = __webpack_require__(346);
 
 	var _registerServiceWorker2 = _interopRequireDefault(_registerServiceWorker);
 
@@ -22233,7 +22233,7 @@
 
 
 	// module
-	exports.push([module.id, "body {\n  margin: 0;\n  padding: 0;\n  font-family: sans-serif;\n}\n\n#sidebar {\n  z-index: 2;\n  position: fixed;\n  width: 200px;\n  height:100%;\n  background: #151719;\n  right: -200px;\n  transition: all 500ms;\n}\n\n#sidebar.active {\n  right:0px;\n}\n\n#sidebar ul li {\n  color: rgba(230,230,230,0.9);\n  list-style:none;\n  padding: 15px 10px;\n  border-bottom: 1px solid rgba(100,100,100,0.3);\n}\n\n#sidebar .toggle-btn {\n  position: absolute;\n  right:200px;\n  top: 24px;\n}\n\n#sidebar .toggle-btn .thisSpan {\n  display: block;\n  width: 30px;\n  height: 5px;\n  background: #151719;\n  margin: 5px 0px;\n}\n\n#root {\n  z-index:1;\n  position: fixed;\n}\n\n.custom-item {\n  pointer-events: none;\n}\n\n.rct-label-group {\n  background: #1C1A1A !important;\n}\n\n.rct-sidebar-header {\n  background: #1C1A1A !important;\n}\n\n.trash {\n  position: relative;\n  left: -50%;\n  color: red;\n}\n\n#inputScenarioTitle {\n  background: orange;\n  position: absolute;\n  top: 50%;\n  left: 50%;\n  width: 75%;\n  transform: translate(-50%, -50%);\n}\n\n.react-calendar-timeline .rct-items .rct-item .rct-item-overflow .rct-item-content {\n  width: 100%;\n  position: static !important;\n}\n\n.custom-item {\n  position: relative;\n  z-index: 9000;\n}\n", ""]);
+	exports.push([module.id, "body {\n  margin: 0;\n  padding: 0;\n  font-family: sans-serif;\n}\n\n#sidebar {\n  z-index: 2;\n  position: fixed;\n  width: 200px;\n  height:100%;\n  background: #151719;\n  right: -200px;\n  transition: all 500ms;\n}\n\n#sidebar.active {\n  right:0px;\n}\n\n#sidebar ul li {\n  color: rgba(230,230,230,0.9);\n  list-style:none;\n  padding: 15px 10px;\n  border-bottom: 1px solid rgba(100,100,100,0.3);\n}\n\n#sidebar .toggle-btn {\n  position: absolute;\n  right:200px;\n  top: 24px;\n}\n\n#sidebar .toggle-btn .thisSpan {\n  display: block;\n  width: 30px;\n  height: 5px;\n  background: #151719;\n  margin: 5px 0px;\n}\n\n#root {\n  z-index:1;\n  position: fixed;\n}\n\n.custom-item {\n  pointer-events: none;\n}\n\n.rct-label-group {\n  background: #1C1A1A !important;\n}\n\n.rct-sidebar-header {\n  background: #1C1A1A !important;\n}\n\n.trash {\n  position: relative;\n  left: -50%;\n  color: red;\n}\n\n.trashGroup {\n  position: relative;\n  color: red;\n}\n\n#inputScenarioTitle {\n  background: orange;\n  position: absolute;\n  top: 50%;\n  left: 50%;\n  width: 75%;\n  transform: translate(-50%, -50%);\n}\n\n.react-calendar-timeline .rct-items .rct-item .rct-item-overflow .rct-item-content {\n  width: 100%;\n  position: static !important;\n}\n\n.custom-item {\n  position: relative;\n  z-index: 9000;\n}\n\n.addGroupBtn {\n  position: fixed;\n  top: 2%;\n  left: 2%;\n}\n\n.addGroupBtn img {\n  width: 40px;\n}", ""]);
 
 	// exports
 
@@ -22812,6 +22812,14 @@
 
 	var _itemMenu2 = _interopRequireDefault(_itemMenu);
 
+	var _groupMenu = __webpack_require__(347);
+
+	var _groupMenu2 = _interopRequireDefault(_groupMenu);
+
+	var _addGroupBtn = __webpack_require__(345);
+
+	var _addGroupBtn2 = _interopRequireDefault(_addGroupBtn);
+
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 	function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } else { return Array.from(arr); } }
@@ -22856,6 +22864,7 @@
 	    var items = [];
 	    var groups = [];
 	    var deletedItems = [];
+	    var deletedGroups = [];
 
 	    for (var i = 0; i < 13; i++) {
 	      items.push({
@@ -22890,9 +22899,11 @@
 	      groups: groups,
 	      items: items,
 	      deletedItems: deletedItems,
+	      deletedGroups: deletedGroups,
 	      defaultTimeStart: defaultTimeStart,
 	      defaultTimeEnd: defaultTimeEnd,
-	      selectedItem: null
+	      selectedItem: null,
+	      selectedGroup: null
 	    };
 	    return _this;
 	  }
@@ -22923,6 +22934,7 @@
 	      return _react2.default.createElement(
 	        'div',
 	        null,
+	        _react2.default.createElement(_addGroupBtn2.default, { addGroup: this.addGroup }),
 	        _react2.default.createElement(_sideBar2.default, {
 	          addItem: this.addItem.bind(this)
 	        }),
@@ -23006,6 +23018,19 @@
 	    });
 	  };
 
+	  this.addGroup = function () {
+	    var groups = _this3.state.groups;
+
+
+	    _this3.setState({
+	      groups: [].concat(_toConsumableArray(groups), [{
+	        id: '' + groups.length,
+	        title: '',
+	        tip: 'additional information'
+	      }])
+	    });
+	  };
+
 	  this.handleCanvasClick = function (groupId, time, event) {
 	    console.log('Canvas clicked', groupId, time, event);
 	  };
@@ -23033,8 +23058,8 @@
 
 	    if (event.keyCode === 13) {
 	      // REMOVE INPUT BOX ON ENTER
+	      var inputTitleValue = inputTitle.value || currentTitle.innerText;
 
-	      var inputTitleValue = inputTitle.value || currentTitle.innerHTML;
 	      inputTitle.parentNode.removeChild(inputTitle);
 	      //this.inputNotShowing = true;
 
@@ -23056,6 +23081,38 @@
 	      currentTitle.style.display = "inline";
 	      trashCan.style.display = "none";
 	      _this3.clickedBefore = false;
+	    };
+
+	    return true;
+	  };
+
+	  this.enterKeyPressGroup = function (clickEvent, groupId, currentTitle, copyCurrentTitle, event) {
+	    event = event || window.event;
+	    var inputTitle = document.getElementById("inputGroup");
+	    var inputTitleValue = inputTitle.value || copyCurrentTitle;
+
+	    if (event.keyCode === 13) {
+	      console.log(currentTitle, copyCurrentTitle);
+	      inputTitle.parentNode.removeChild(inputTitle);
+
+	      currentTitle.innerText = inputTitleValue;
+	      // SHOW CURRENTLY DISPLAYED TITLE
+	      currentTitle.style.display = "inline";
+
+	      // INSERT CHANGED TITLE INFO INTO ITEMS
+	      var _groups = _this3.state.groups.slice(0);
+	      _groups[groupId].title = inputTitleValue;
+	      _this3.setState({ groups: _groups });
+	      // RESET CLICKED BEFORE
+	      _this3.groupClickedBefore = false;
+	    };
+
+	    if (event.keyCode === 27) {
+	      inputTitle.parentNode.removeChild(inputTitle);
+	      //this.inputNotShowing = true;
+	      currentTitle.innerText = inputTitleValue;
+	      currentTitle.style.display = "inline";
+	      _this3.groupClickedBefore = false;
 	    };
 
 	    return true;
@@ -23094,6 +23151,37 @@
 	    console.log('Clicked: ' + itemId);
 	  };
 
+	  this.handleGroupClick = function (groupId, event) {
+	    // PUT INSIDE BAR IF CLICKED FOR THE FIRST TIME
+	    if (!_this3.groupClickedBefore) {
+	      var currentTitle = event.currentTarget;
+	      var copyCurrentTitle = currentTitle.innerText.slice(0);
+
+	      // CREATE INPUT ELEMENT
+	      var inputDOM = document.createElement('input');
+	      inputDOM.onkeydown = _this3.enterKeyPressGroup.bind(_this3, event, groupId, currentTitle, copyCurrentTitle);
+	      inputDOM.setAttribute("id", "inputGroup");
+	      inputDOM.setAttribute("type", "text/javascipt");
+	      inputDOM.value = '' + currentTitle.innerText;
+	      console.log(inputDOM.value);
+	      // HIDE ORIGINAL TITLE TO SHOW INPUT
+	      console.log(event.currentTarget.childNodes[0]);
+	      currentTitle.innerText = '';
+
+	      // PUT INPUT INSIDE DOM
+	      event.currentTarget.prepend(inputDOM);
+	      _this3.inputNotShowing = false;
+	      _this3.groupClickedBefore = true;
+
+	      // HAVE BEEN CLICKED ONCE
+	      //console.log(event.currentTarget)
+	      _this3.setState({
+	        selectedGroup: event.currentTarget
+	      });
+	      //console.log(this.state.selectedItem.getBoundingClientRect());
+	    }
+	  };
+
 	  this.handleItemSelect = function (itemId) {
 	    console.log('Selected: ' + itemId);
 	  };
@@ -23116,14 +23204,32 @@
 	    });
 	  };
 
+	  this.handleGroupToDeletedGroups = function (group) {
+	    var _state3 = _this3.state,
+	        groups = _state3.groups,
+	        deletedGroups = _state3.deletedGroups;
+
+	    var updateDeletedGroup = deletedGroups.slice(0);
+	    updateDeletedGroup.push(group);
+	    _this3.groupClickedBefore = false;
+
+	    _this3.setState({
+	      groups: groups.map(function (eachGroup) {
+	        return eachGroup.id === group.id ? {} : eachGroup;
+	      }),
+	      selectedGroup: null,
+	      deletedGroups: updateDeletedGroup
+	    });
+	  };
+
 	  this.handleItemContextMenu = function (itemId) {
 	    console.log('Context Menu: ' + itemId);
 	  };
 
 	  this.handleItemMove = function (itemId, dragTime, newGroupOrder) {
-	    var _state3 = _this3.state,
-	        items = _state3.items,
-	        groups = _state3.groups;
+	    var _state4 = _this3.state,
+	        items = _state4.items,
+	        groups = _state4.groups;
 
 	    var group = groups[newGroupOrder];
 
@@ -23185,7 +23291,7 @@
 	      ),
 	      _react2.default.createElement(_itemMenu2.default, {
 	        onPressTrashCan: _this3.handleItemToDeletedItems.bind(_this3, item),
-	        id: 'itemMenu' + item.id
+	        id: "itemMenu" + item.id
 	      })
 	    );
 	  };
@@ -23195,8 +23301,18 @@
 
 	    return _react2.default.createElement(
 	      'div',
-	      { className: 'custom-group' },
-	      group.title
+	      null,
+	      _react2.default.createElement(
+	        'div',
+	        { className: 'custom-group', onClick: function onClick(e) {
+	            return _this3.handleGroupClick(group.id, e);
+	          } },
+	        group.title
+	      ),
+	      _react2.default.createElement(_groupMenu2.default, {
+	        onPressTrashCanGroup: _this3.handleGroupToDeletedGroups.bind(_this3, group),
+	        id: "groupMenu" + group.id
+	      })
 	    );
 	  };
 	};
@@ -50982,7 +51098,16 @@
 	            })
 	          )
 	        ),
-	        _react2.default.createElement('div', { className: 'SSreggi', style: { position: "relative", zIndex: 900, top: "62%", left: "12%", background: "blue", height: "170px", width: "150px", color: "white" } })
+	        _react2.default.createElement('div', { className: 'SSreggi', style: { position: "relative", zIndex: 900, top: "62%", left: "12%", background: "blue", height: "170px", width: "150px", color: "white" } }),
+	        _react2.default.createElement(
+	          'a',
+	          { href: '/logout' },
+	          _react2.default.createElement(
+	            'button',
+	            null,
+	            'Logout'
+	          )
+	        )
 	      );
 	    }
 	  }]);
@@ -51141,6 +51266,33 @@
 /* 345 */
 /***/ (function(module, exports, __webpack_require__) {
 
+	"use strict";
+
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
+
+	var _react = __webpack_require__(1);
+
+	var _react2 = _interopRequireDefault(_react);
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+	var AddGroupBtn = function AddGroupBtn(_ref) {
+	  var addGroup = _ref.addGroup;
+	  return _react2.default.createElement(
+	    "a",
+	    { onClick: addGroup, className: "addGroupBtn" },
+	    _react2.default.createElement("img", { src: "../../img/groupAdd.svg" })
+	  );
+	};
+
+	exports.default = AddGroupBtn;
+
+/***/ }),
+/* 346 */
+/***/ (function(module, exports, __webpack_require__) {
+
 	/* WEBPACK VAR INJECTION */(function(process) {'use strict';
 
 	Object.defineProperty(exports, "__esModule", {
@@ -51243,6 +51395,34 @@
 	  }
 	}
 	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(3)))
+
+/***/ }),
+/* 347 */
+/***/ (function(module, exports, __webpack_require__) {
+
+	"use strict";
+
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
+
+	var _react = __webpack_require__(1);
+
+	var _react2 = _interopRequireDefault(_react);
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+	var GroupMenu = function GroupMenu(_ref) {
+	  var onPressTrashCanGroup = _ref.onPressTrashCanGroup,
+	      id = _ref.id;
+	  return _react2.default.createElement(
+	    "a",
+	    { onClick: onPressTrashCanGroup, className: "trashGroup", id: id },
+	    "x"
+	  );
+	};
+
+	exports.default = GroupMenu;
 
 /***/ })
 /******/ ]);
