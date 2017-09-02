@@ -1,5 +1,6 @@
 import React from 'react';
 import moment from 'moment';
+import axios from 'axios';
 import Timeline from 'react-calendar-timeline/lib';
 import containerResizeDetector from 'react-calendar-timeline/lib/resize-detector/container';
 import SideBar from './components/sideBar';
@@ -8,9 +9,8 @@ import ItemMenu from './components/itemMenu';
 import GroupMenu from './components/groupMenu';
 import AddGroupBtn from './components/addGroupBtn';
 
-
-const minTime = moment().add(-1, 'years').valueOf(); 
-const maxTime = moment().add(3, 'years').valueOf();
+const minTime = moment().add(-1, 'years').valueOf();
+const maxTime = moment().add(18, 'years').valueOf();
 
 const keys = {
   groupIdKey: 'id',
@@ -29,38 +29,12 @@ export default class App extends React.Component {
     super(props)
     const startDate = new Date().getTime();
     const startValue = Math.floor(moment(startDate).valueOf() / 10000000) * 10000000;
-    const endValue = Math.floor(moment(startDate).valueOf() / 10000000) * 10000000 + 100000000;
-    
+    const endValue = Math.floor(moment(startDate).valueOf() / 10000000) * 10000000 + 100000000 * 4;
+
     const items = [];
     const groups = [];
     const deletedItems = [];
     const deletedGroups = [];
-
-    for (let i = 0; i < 13; i++) {
-      items.push({
-        id: `${i}`,
-        group: `${i}`,
-        title: 'hahahaha',
-        start: startValue,
-        end: endValue,
-        tip: 'additional information',
-      });
-
-      groups.push({
-        id: `${i}`,
-        title: `Dummy${i}`,
-        tip: 'additional information',
-      });
-
-      deletedItems.push({
-        id: `${i}`,
-        group: `${i}`,
-        title: 'hahahaha',
-        start: startValue,
-        end: endValue,
-        tip: 'additional information',
-      });
-    };
 
     const defaultTimeStart = moment().startOf('month').toDate();
     const defaultTimeEnd = moment().startOf('month').add(41, 'day').toDate();
@@ -74,49 +48,169 @@ export default class App extends React.Component {
       defaultTimeEnd,
       selectedItem: null,
       selectedGroup: null,
+      itemColor: {},
     };
+  }
+
+  componentDidMount() {
+    axios.get('/init')
+      .then((result) => {
+        const [
+          deletedGroups,
+          groups,
+          deletedItems,
+          items,
+        ] = result.data;
+
+    const randomColor = () => {
+      const rgb = [];
+      for(let i = 1; i <= 3; i++) {
+        rgb.push(Math.floor(Math.random() * 256));
+      }
+     return `rgb(${rgb.join(',')})`;
+    };
+
+    const newItemColorObj = {};
+
+    const nextGroups = [];
+
+    groups.forEach((group) => {
+      const {groupId, tip, title} = group;
+      const nextGroup = Object.assign({}, {tip, title});
+      nextGroup.color = randomColor();
+      //console.log(nextGroup.color);
+      newItemColorObj[groupId] = nextGroup.color;
+      nextGroup.id = groupId;
+      nextGroups.push(nextGroup);
+    });
+    console.log(nextGroups);
+
+    const nextItems = [];
+
+    items.forEach((item) => {
+      const {itemId, tip, title, start, group, end} = item;
+      const nextItem = Object.assign({}, {tip, title, start, group, end});
+      nextItem.color = newItemColorObj[group];
+      console.log(nextItem.color);
+      nextItem.id = itemId;
+      nextItems.push(nextItem);
+    });
+
+    const nextDeletedItems = [];
+
+    deletedItems.forEach((deletedItem) => {
+      const {itemId, tip, title, start, group, end} = deletedItem;
+      const nextDeletedItem = Object.assign({}, {tip, title, start, group, end});
+      nextDeletedItem.color = newItemColorObj[group];
+      nextDeletedItem.id = itemId;
+      nextDeletedItems.push(nextDeletedItem);
+    });
+
+    this.setState({
+        groups: nextGroups,
+        items: nextItems,
+        deletedItems: nextDeletedItems,
+        deletedGroups,
+        itemColor: newItemColorObj,
+      });
+    });
   }
 
   addItem = () => {
     const time = this.timeLine.state.cursorTime;
-    const { items } = this.state;
-    const groupAdd = this.currentRow;
+    const { items, deletedItems } = this.state;
+    const groupId = this.state.groups[this.currentRow].id
+
+    let maxIndex = -1;
+    for (let i = 0; i < deletedItems.length; i++) {
+      const deletedItem = deletedItems[i];
+      if (deletedItem.id * 1 > maxIndex) {
+        maxIndex = deletedItem.id * 1;
+      }
+    }
+
+    for (let i = 0; i < items.length; i++) {
+      const item = items[i];
+      if (item.id * 1 > maxIndex) {
+        maxIndex = item.id * 1;
+      }
+    }
+
+    const newItem = {
+      id: `${maxIndex + 1}`,
+      group: `${groupId}`,
+      title: 'newItem',
+      start: time,
+      end: time + 4 * 24 * 3600 * 1000,
+      tip: 'additional information',
+      color: this.state.itemColor[groupId]
+    };
+
+    axios.post('/addItem', newItem)
+
+    console.log(items)
     this.setState({
       items: [
         ...items,
-        {
-          id: `${items.length}`,
-          group: `${groupAdd}`,
-          title: '',
-          start: time,
-          end: time + 4 * 24 * 3600 * 1000,
-          tip: 'additional information',
-        },
+        newItem
       ],
     });
   }
 
   addGroup = () => {
-    const {groups} = this.state;
+    const { groups, deletedGroups } = this.state;
+
+    let maxIndex = -1;
+    for (let i = 0; i < deletedGroups.length; i++) {
+      const deletedGroup = deletedGroups[i];
+      if (deletedGroup.id * 1 > maxIndex) {
+        maxIndex = deletedGroup.id * 1;
+      }
+    }
+
+    for (let i = 0; i < groups.length; i++) {
+      const group = groups[i];
+      if (group.id * 1 > maxIndex) {
+        maxIndex = group.id * 1;
+      }
+    }
+
+    let newGroup = {
+      id: `${maxIndex + 1}`,
+      title: 'newGroup',
+      tip: 'additional information',
+    };
+
+    const randomColor = () => {
+      const rgb = [];
+      for (let i = 1; i <= 3; i++) {
+        rgb.push(Math.floor(Math.random() * 256));
+      }
+      return `rgb(${rgb.join(',')})`;
+    };
+
+    axios.post('/addGroup', newGroup);
+
+    newGroup = Object.assign({}, newGroup, {color: randomColor()});
+    const obj = {};
+    obj[newGroup.id] = newGroup.color;
+    const newItemColorObj = Object.assign({}, this.state.itemColor, obj);
 
     this.setState({
       groups: [
         ...groups,
-        {
-          id: `${groups.length}`,
-          title: '',
-          tip: 'additional information',
-        },
+        newGroup
       ],
+      itemColor: newItemColorObj,
     });
   }
 
   handleCanvasClick = (groupId, time, event) => {
-    console.log('Canvas clicked', groupId, time, event);
+    console.log('Canvas clicked', groupId, time, event, this.currentRow);
   }
 
   handleCanvasMove = (event) => {
-    const [row, time] = this.timeLine.rowAndTimeFromEvent(event);
+    const [ row, time ] = this.timeLine.rowAndTimeFromEvent(event);
     //console.log(row, time);
     this.currentTime = time;
     this.currentRow = row;
@@ -131,64 +225,95 @@ export default class App extends React.Component {
     const inputTitle = document.getElementById("inputScenarioTitle");
     const trashCan = document.getElementById("itemMenu" + itemId)
 
-    if (event.keyCode === 13) {
+   if (event.keyCode === 13) {
       // REMOVE INPUT BOX ON ENTER
       const inputTitleValue = inputTitle.value || currentTitle.innerText;
+      console.log(currentTitle.innerText, typeof currentTitle.innerText)
+      console.log(inputTitle.value, typeof inputTitle.value)
 
-      inputTitle.parentNode.removeChild(inputTitle);
+     inputTitle.parentNode.removeChild(inputTitle);
       //this.inputNotShowing = true;
 
-      // SHOW CURRENTLY DISPLAYED TITLE
-      currentTitle.style.display = "inline";
+     // SHOW CURRENTLY DISPLAYED TITLE
+      currentTitle.style.display = "block";
       trashCan.style.display = "none";
 
-      // INSERT CHANGED TITLE INFO INTO ITEMS
+     // INSERT CHANGED TITLE INFO INTO ITEMS
       const items = this.state.items.slice(0);
-      items[itemId].title = inputTitleValue;
-      this.setState({ items });
+
+     for (let i = 0; i < items.length; i++) {
+        if (items[i].id === itemId) {
+          items[i].title = inputTitleValue;
+        }
+      }
+
+     axios.post('/updateItemTitle', { itemId, inputTitleValue })
+      .then( () => console.log("Group added to DB"))
+      .catch( err => {throw err;} );
+
+     this.setState({ items });
       // RESET CLICKED BEFORE
       this.clickedBefore = false;
-    };
+    }
 
-    if (event.keyCode === 27) {
+   if (event.keyCode === 27) {
       inputTitle.parentNode.removeChild(inputTitle);
       //this.inputNotShowing = true;
-      currentTitle.style.display = "inline";
+      currentTitle.style.display = "block";
       trashCan.style.display = "none";
       this.clickedBefore = false;
-    };
+    }
 
-    return true;
+   return true;
   }
 
   enterKeyPressGroup = (clickEvent, groupId, currentTitle, copyCurrentTitle, event) => {
     event = event || window.event;
     const inputTitle = document.getElementById("inputGroup");
     const inputTitleValue = inputTitle.value || copyCurrentTitle;
-   
+    const trashCanGroup = document.getElementById("groupMenu" + groupId);
+
     if (event.keyCode === 13) {
+      console.log(this.state.items)
       console.log(currentTitle, copyCurrentTitle)
       inputTitle.parentNode.removeChild(inputTitle);
-
       currentTitle.innerText = inputTitleValue;
+
       // SHOW CURRENTLY DISPLAYED TITLE
       currentTitle.style.display = "inline";
+      trashCanGroup.style.display = "none";
 
       // INSERT CHANGED TITLE INFO INTO ITEMS
       const groups = this.state.groups.slice(0);
-      groups[groupId].title = inputTitleValue;
+
+      let index;
+      for (let i = 0; i < groups.length; i++) {
+        const group = groups[i];
+        if (group.id === groupId) {
+          index = i;
+          break;
+        }
+      }
+
+      groups[index].title = inputTitleValue;
+
+      axios.post('/changeGroupTitle', { groupId, inputTitleValue })
+        .then( () => console.log("Group added to DB"))
+        .catch( err => {throw err;} );
+
       this.setState({ groups });
       // RESET CLICKED BEFORE
       this.groupClickedBefore = false;
-    };
+    }
 
     if (event.keyCode === 27) {
       inputTitle.parentNode.removeChild(inputTitle);
       //this.inputNotShowing = true;
       currentTitle.innerText = inputTitleValue;
       currentTitle.style.display = "inline";
+      trashCanGroup.style.display = "none";
       this.groupClickedBefore = false;
-    };
+    }
 
     return true;
   }
@@ -202,8 +327,8 @@ export default class App extends React.Component {
       // CREATE INPUT ELEMENT
       const inputDOM = document.createElement('input');
       inputDOM.onkeydown = this.enterKeyPress.bind(this, event, itemId, currentTitle);
-      inputDOM.setAttribute( "id" , "inputScenarioTitle");
-      inputDOM.setAttribute( "type", "text/javascipt" );
+      inputDOM.setAttribute("id" , "inputScenarioTitle");
+      inputDOM.setAttribute("type", "text/javascipt");
       inputDOM.value = `${currentTitle.innerText}`;
 
       // HIDE ORIGINAL TITLE TO SHOW INPUT
@@ -216,7 +341,6 @@ export default class App extends React.Component {
 
       // HAVE BEEN CLICKED ONCE
       this.clickedBefore = true;
-      //console.log(event.currentTarget)
       this.setState({
         selectedItem: event.currentTarget,
       });
@@ -230,24 +354,27 @@ export default class App extends React.Component {
   // PUT INSIDE BAR IF CLICKED FOR THE FIRST TIME
     if (!this.groupClickedBefore) {
       const currentTitle = event.currentTarget;
-      const copyCurrentTitle = currentTitle.innerText.slice(0)
+      const copyCurrentTitle = currentTitle.innerText.slice(0);
+      const trashCanGroup = document.getElementById("groupMenu" + groupId);
 
       // CREATE INPUT ELEMENT
       const inputDOM = document.createElement('input');
       inputDOM.onkeydown = this.enterKeyPressGroup.bind(this, event, groupId, currentTitle, copyCurrentTitle);
-      inputDOM.setAttribute( "id" , "inputGroup");
+      inputDOM.setAttribute( "id" , "inputGroup"); //id 가 고유가 아니다.
       inputDOM.setAttribute( "type", "text/javascipt" );
       inputDOM.value = `${currentTitle.innerText}`;
       console.log(inputDOM.value)
       // HIDE ORIGINAL TITLE TO SHOW INPUT
       console.log(event.currentTarget.childNodes[0])
+      trashCanGroup.style.display = "inline";
       currentTitle.innerText = '';
+
 
       // PUT INPUT INSIDE DOM
       event.currentTarget.prepend(inputDOM);
       this.inputNotShowing = false;
       this.groupClickedBefore = true;
-      
+
       // HAVE BEEN CLICKED ONCE
       //console.log(event.currentTarget)
       this.setState({
@@ -263,15 +390,28 @@ export default class App extends React.Component {
 
   handleItemToDeletedItems = (item) => {
     const { items, deletedItems } = this.state;
+    console.log(items)
     const updateDeletedItem = deletedItems.slice(0);
+
     updateDeletedItem.push(item)
     this.clickedBefore = false;
-    
+
+    let index;
+    for (let i = 0; i < items.length; i++) {
+      const eachItem = items[i];
+      if (eachItem.id === item.id) {
+        index = i;
+      }
+    }
+
+    let newItems = items.slice(0);
+    newItems.splice(index, 1);
+
+    //this.currentRow -= 1; //지울때 row 설정을 바꾸면?
+    axios.post('/deleteItem', item)
+
     this.setState({
-      items: items.map(eachItem => 
-        eachItem.id === item.id
-          ? {}
-          : eachItem),
+      items: newItems,
       selectedItem: null,
       deletedItems: updateDeletedItem,
     });
@@ -280,17 +420,51 @@ export default class App extends React.Component {
   handleGroupToDeletedGroups = (group) => {
     const { groups, deletedGroups } = this.state;
     const updateDeletedGroup = deletedGroups.slice(0);
+
     updateDeletedGroup.push(group)
     this.groupClickedBefore = false;
-    
+
+    let index;
+    for (let i = 0; i < groups.length; i++) {
+      const eachGroup = groups[i];
+      if (eachGroup.id === group.id) {
+        index = i;
+      }
+    }
+
+    let newGroups = groups.slice(0);
+    newGroups.splice(index, 1);
+
+    axios.post('/deleteGroup', group)
+
     this.setState({
-      groups: groups.map(eachGroup => 
-        eachGroup.id === group.id
-          ? {}
-          : eachGroup),
+      groups: newGroups,
       selectedGroup: null,
       deletedGroups: updateDeletedGroup,
     });
+  }
+
+  restoreDeletedItem = (item) => {
+    console.log("this is the item");
+    console.log(item);
+    const nextDeletedItems = this.state.deletedItems.slice(0);
+    const nextItems = this.state.items.slice(0);
+    for(let i = 0; i < nextDeletedItems.length; i++) {
+      const deletedItem = nextDeletedItems[i];
+      if(deletedItem.id === item.id) {
+        nextItems.push(nextDeletedItems.splice(i,1)[0]);
+        break;
+      }
+    }
+
+   console.log(nextDeletedItems);
+    axios.post('/restoreDeletedItem', { item })
+      .then( () => console.log("restored added to DB"))
+      .catch( err => {throw err;} );
+    this.setState({
+      deletedItems: nextDeletedItems,
+      items: nextItems
+    })
   }
 
   handleItemContextMenu = (itemId) => {
@@ -301,15 +475,25 @@ export default class App extends React.Component {
     const { items, groups } = this.state;
     const group = groups[newGroupOrder];
 
+    let orderItem;
+    for (let i = 0; i < items.length; i++) {
+      if (items[i].id === itemId) {
+        orderItem = Object.assign({}, items[i], {group: group.id});
+      }
+    }
+    console.log(orderItem)
+    axios.post('/changeGroupOrder', orderItem)
+
     this.setState({
-      items: items.map(item => 
-        item.id === itemId 
-          ? Object.assign({}, item, {
-              start: dragTime,
-              end: dragTime + (item.end - item.start),
-              group: group.id,
-            }) 
-          : item),
+      items: items.map((item) =>
+      item.id === itemId
+        ? Object.assign({}, item, {
+            start: dragTime,
+            end: dragTime + (item.end - item.start),
+            group: group.id,
+            color: this.state.itemColor[group.id]
+          })
+        : item),
     })
 
     console.log('Moved', itemId, dragTime, newGroupOrder)
@@ -318,13 +502,27 @@ export default class App extends React.Component {
   handleItemResize = (itemId, time, edge) => {
     const { items } = this.state;
 
+
+    let resizedItem;
+    for (let i = 0; i < items.length; i++) {
+      if (items[i].id === itemId) {
+        resizedItem = Object.assign({}, items[i], {
+          start: edge === 'left' ? time : items[i].start,
+          end: edge === 'left' ? items[i].end : time,
+        });
+      }
+    }
+
+    axios.post('/resizedItem', resizedItem);
+
+
     this.setState({
-      items: items.map(item => 
-        item.id === itemId 
+      items: items.map(item =>
+        item.id === itemId
           ? Object.assign({}, item, {
               start: edge === 'left' ? time : item.start,
               end: edge === 'left' ? item.end : time,
-            }) 
+            })
           : item)
     })
 
@@ -355,12 +553,12 @@ export default class App extends React.Component {
   itemRenderer = ({ item }) => {
     return (
       <div>
-        <div className="custom-item">
+        <div className="custom-item" style={{ background: item.color }} >
           <span className="title">
             {item.title}
           </span>
         </div>
-        <ItemMenu 
+        <ItemMenu
           onPressTrashCan={this.handleItemToDeletedItems.bind(this, item)}
           id={"itemMenu" + item.id}
         />
@@ -369,29 +567,43 @@ export default class App extends React.Component {
   }
 
   groupRenderer = ({ group }) => {
+
     return (
-      <div>  
-        <div className="custom-group" onClick={e => this.handleGroupClick(group.id, e)}>
+      <div className="group-container">
+        <span className="custom-grouspan" onClick={event => this.handleGroupClick(group.id, event)}>
           {group.title}
-        </div>
-        <GroupMenu 
+        </span>
+        <GroupMenu
           onPressTrashCanGroup={this.handleGroupToDeletedGroups.bind(this, group)}
           id={"groupMenu" + group.id}
         />
+        <div className="colorBox" style={{ background: group.color }} />
       </div>
     )
   }
 
   render () {
-    const { groups, items, defaultTimeStart, defaultTimeEnd } = this.state;
+    const {
+      groups,
+      items,
+      defaultTimeStart,
+      defaultTimeEnd
+    } = this.state;
+
+    const checkIfGroupIsTooMany = groups.length < 11 ? 50 : 30;
 
     return (
       <div>
-        <AddGroupBtn addGroup={this.addGroup} />
-        <SideBar
-          addItem={this.addItem.bind(this)}
+        <AddGroupBtn
+                  addGroup={this.addGroup}
         />
-        <Timeline 
+        <SideBar
+                  addItem={this.addItem}
+                  deletedItems={this.state.deletedItems}
+                  restoreDeletedItem={this.restoreDeletedItem}
+        />
+        <div className="content">
+        <Timeline
                   ref={(timeLine) => {this.timeLine = timeLine;}}
                   groups={groups}
                   items={items}
@@ -400,9 +612,10 @@ export default class App extends React.Component {
                   fullUpdate
 
                   minZoom={41 * 24 * 60 * 60 * 1000}
+                  lineHeight={checkIfGroupIsTooMany}
 
                   sidebarWidth={150}
-                  sidebarContent={<div className="userName" style={{textAlign:"center"}}>Username</div>} //username
+                  sidebarContent={<div className="userName" style={{textAlign:"center"}}>Category</div>} //username
                   //rightSidebarWidth={150}
                   //rightSidebarContent={<div>Above The Right</div>}
 
@@ -439,6 +652,7 @@ export default class App extends React.Component {
 
                   moveResizeValidator={this.moveResizeValidator}>
         </Timeline>
+        </div>
        </div>
     )
   }

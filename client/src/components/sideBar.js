@@ -1,6 +1,7 @@
 import React, { Component } from 'react'
 import interact from 'interact.js'
 import Draggable from './draggableItem';
+import FaSignOut from 'react-icons/lib/fa/sign-out';
 
 export default class SideBar extends Component {
   constructor(props){
@@ -38,11 +39,14 @@ export default class SideBar extends Component {
   render() {
     this.mountInteract();
     return (
-      <div id ="sidebar" style={{position:"fixed", zIndex:700, top:"-10px", opacity:0.9}}>
+      <div id ="sidebar" style={{position:"fixed", zIndex:700, top:"-10px", opacity:0.8}}>
         <div className="toggle-btn" onClick={this.toggleSideBar.bind(this)}>
           <span className="thisSpan"></span>
           <span className="thisSpan"></span>
           <span className="thisSpan"></span>
+        </div>
+        <div className="logo" id="debug">
+          Debugg<span className="titler">er</span>
         </div>
         <ul id="option">
           <li>
@@ -51,9 +55,19 @@ export default class SideBar extends Component {
             />
           </li>
         </ul>
-        <div className="SSreggi" style={{position:"relative", zIndex:900, top:"62%", left:"12%",background:"blue", height:"170px", width:"150px", color:"white"}}>
+        
+        <div className="SSreggi">
+          {this.props.deletedItems.reverse().map((deletedItem) => (
+            <div onClick={this.props.restoreDeletedItem.bind(this, deletedItem)} className="deletedItems" key={deletedItem.id} style={{ background: deletedItem.color }}>
+              {deletedItem.title}
+            </div>
+          ))}
         </div>
-        <a href="/logout"><button>Logout</button></a>
+        <a href="/logout">
+          <button className="loggie">
+            <FaSignOut size={20} color="#e4e4e5"/>
+          </button>
+        </a>
       </div>
     )
   }

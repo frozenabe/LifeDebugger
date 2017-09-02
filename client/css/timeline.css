@@ -1,0 +1,254 @@
+body {
+  margin: 0;
+  padding: 0;
+  font-family: sans-serif;
+  background: #d4d4d4;
+  height: 100%;
+  color: #003642;
+}
+
+#root {
+  z-index:1;
+  position: fixed;
+  overflow-y: scroll;
+  height: 100%;
+}
+
+body, html, #root {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  width: 100%;
+}
+
+.quote {
+  font-family: 'Yantramanav', sans-serif;
+  font-size: 26px;
+}
+
+.content {
+  height: 100%;
+  width: 100%;
+  overflow: auto;
+}
+
+#sidebar {
+  z-index: 2;
+  position: fixed;
+  width: 200px;
+  height:100%;
+  background: #151719;
+  right: -200px;
+  transition: all 500ms;
+}
+
+#sidebar.active {
+  right:0px;
+}
+
+#sidebar ul li {
+  color: rgba(230,230,230,0.9);
+  list-style: none;
+  padding: 15px 10px;
+  border-bottom: 1px solid rgba(100,100,100,0.3);
+}
+
+#sidebar .toggle-btn {
+  position: absolute;
+  right:200px;
+  top: 24px;
+}
+
+#sidebar .toggle-btn .thisSpan {
+  display: block;
+  width: 30px;
+  height: 5px;
+  background: #151719;
+  margin: 5px 0px;
+}
+
+.react-calendar-timeline .rct-items .rct-item .rct-item-overflow .rct-item-content {
+  width: 100%;
+  position: static !important;
+}
+
+.react-calendar-timeline .rct-header .rct-label {
+  background: #ffffff !important;
+}
+
+.react-calendar-timeline .rct-header .rct-label.rct-label-only {
+  background: #ffffff !important;
+  height: 30px !important;
+  line-height: 30px !important;
+}
+
+.rct-label-group {
+  background: #0ec1a7 !important;
+}
+
+.rct-sidebar-header {
+  background: #0ec1a7 !important;
+}
+
+.rct-scroll {
+  width: 1290px !important;
+}
+
+.trash {
+  position: relative;
+  left: -50%;
+  color: red;
+}
+
+.trashGroup {
+  position: absolute;
+  display: none;
+  color: red;
+  right: 2%;
+}
+
+#inputScenarioTitle {
+  background: orange;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 75%;
+  transform: translate(-50%, -50%);
+}
+
+.custom-item {
+  position: relative;
+  z-index:9000;
+  pointer-events: none;
+}
+
+.custom-group {
+  display: block;
+  height: 28.6px;
+  width: 100px !important;
+}
+
+.addGroupBtn {
+  position: fixed;
+  top: 2%;
+  left: 2%;
+}
+
+.addGroupBtn img {
+  width: 40px;
+}
+
+.SSreggi {
+  position: relative;
+  z-index: 900;
+  top: 55%;
+  left: 12%;
+  background: #e4e4e5;
+  height: 170px;
+  width: 150px;
+  color: white;
+  border-radius: 5px;
+  overflow-y: auto;
+}
+
+.loggie {
+  position: absolute;
+  background: transparent;
+  border: none;
+  top: 95%;
+  left: 40%;
+}
+
+.logo {
+  text-align: center;
+  font-size: 29px;
+  border: 2px solid #e4e4e5;
+  width: 100px;
+  background: transparent;
+  color: #e4e4e5;
+  position: absolute;
+  top: 5%;
+  left: 20%;
+}
+
+.titler {
+  color: #76ff00;
+}
+
+.colorBox {
+  position: absolute;
+  background: blue;
+  width: 10px;
+  right: 10%;
+  height: 10px;
+}
+
+.group-container {
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  background: #ffffff
+}
+
+.custom-grouspan {
+  position: relative !important;
+  right: 10%;
+}
+
+#inputGroup {
+  margin-left: 10%;
+  width: 80%;
+}
+
+.rct-item {
+  background: #e4e4e5 !important;
+  border: none !important;
+  border-radius: 6px;
+}
+
+.newItemSidebar {
+  position: absolute;
+  top: 15%;
+  left: 20%;
+  text-align: center;
+  border-radius: 6px;
+  border: 1px solid #e4e4e5;
+  width: 110px;
+  background: #ff628d;
+  border-right: 7px solid #e4e4e5;
+  border-left: 7px solid #e4e4e5;
+  height: 19px;
+  padding: 2px 0px;
+  font-size: 14px;
+}
+
+.newItemSidebarMoving {
+  position: relative;
+  top: 73.8px;
+  right: 5px;
+  text-align: center;
+  border-radius: 6px;
+  border: 1px solid #e4e4e5;
+  width: 110px;
+  background: #D66EC2;
+  border-right: 7px solid #e4e4e5;
+  border-left: 7px solid #e4e4e5;
+  height: 19px;
+  padding: 2px 0px;
+  font-size: 14px;
+}
+
+.deletedItems {
+  position: relative;
+  text-align: center;
+  border-radius: 6px;
+  border: 1px solid #e4e4e5 ;
+  width: 110px;
+  border-right: 7px solid #e4e4e5 ;
+  border-left: 7px solid #e4e4e5 ;
+  height: 21px;
+  padding: 2px 0px;
+  font-size: 14px;
+  margin: 3px auto;
+  overflow: hidden;
+}

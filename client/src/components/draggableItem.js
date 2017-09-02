@@ -27,14 +27,14 @@ export default class DraggableItem extends Component {
     window.addEventListener('mouseup', this.onMouseUp);
   }
 
-  onMouseUp = () => {
+  onMouseUp = (event) => {
     this.setState({
       isDragging: false,
     });
     window.removeEventListener('mousemove', this.onMouseMove);
     window.removeEventListener('mouseup', this.onMouseUp);
     if (this.outOfSidebarZone && this.state.x !== 0 && this.state.x !== 0) {
-      this.props.onMouseUp();
+      this.props.onMouseUp(event);
     }
     this.setState({
       x: 0,
@@ -54,7 +54,8 @@ export default class DraggableItem extends Component {
     const x = clientX - mouseX;
     const y = clientY - mouseY;
 
-    (x < -150 && x > -900 && y > 90) 
+    //console.log("this is X : ", x, "this is Y : ", y);
+    (x < -120 && x > -1000 && y > 10)
       ? this.outOfSidebarZone = true
       : this.outOfSidebarZone = false;
 
@@ -72,10 +73,13 @@ export default class DraggableItem extends Component {
     } = this.state;
     const style = isDragging ? {transform: 'translate(' + x + 'px, ' + y + 'px)'} : {};
     const className = isDragging ? "custom-item" : "";
+    const newItemSidebarOption = isDragging ? "newItemSidebarMoving" : "newItemSidebar";
 
     return (
       <div className={className} onMouseDown={this.onMouseDown} style={style}>
-        <div className="title" style={{width:"100px", backgroundColor:"blue"}}>ARROW</div>
+        <div className={newItemSidebarOption}>
+          newItem
+        </div>
       </div>
     );
   }

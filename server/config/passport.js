@@ -1,14 +1,14 @@
 const LocalStrategy = require('passport-local').Strategy;
 const User = require('../resources/models/user');
 
-const Passport = function(passport) {
-  passport.serializeUser(function(user, done) {
+const Passport = (passport) => {
+  passport.serializeUser((user, done) => {
     done(null, user.id);
   });
 
   // used to deserialize the user
-  passport.deserializeUser(function(id, done) {
-    User.findById(id, function(err, user) {
+  passport.deserializeUser((id, done) => {
+    User.findById(id, (err, user) => {
       done(err, user);
     });
   });
@@ -19,7 +19,7 @@ const Passport = function(passport) {
     passReqToCallback : true,
   },
   function(req, email, password, done) {
-    User.findOne({ 'email': email }, function(err, user) {
+    User.findOne({ email }, (err, user) => {
       if (err) {
         return done(err);
       }
@@ -31,7 +31,7 @@ const Passport = function(passport) {
         newUser.email = email;
         newUser.password = newUser.generateHash(password);
 
-        newUser.save(function(err) {
+        newUser.save((err) => {
           if (err) {
             throw err;
           }
@@ -47,7 +47,7 @@ const Passport = function(passport) {
     passReqToCallback : true // allows us to pass back the entire request to the callback
   },
   function(req, email, password, done) {
-    User.findOne({ 'email': email }, function(err, user) {
+    User.findOne({ email }, (err, user) => {
       if (err) {
         return done(err);
       }

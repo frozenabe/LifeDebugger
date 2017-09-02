@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 
-const itemSchema = mongoose.Schema({
+const deleteItemSchema = mongoose.Schema({
   itemId: String,
   group: String,
   title: String,
@@ -10,4 +10,4 @@ const itemSchema = mongoose.Schema({
   email: String,
 });
 
-module.exports = mongoose.model('Item', itemSchema);
+module.exports = mongoose.model('DeletedItem', deleteItemSchema);
