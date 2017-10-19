@@ -279,7 +279,6 @@ module.exports = function(app, passport) {
         .then((data) => {
           res.status(200).send('Group deleted well (DB)');
         })
-        .catch(err => console.log("this is " + err));
       })
       .catch(err => console.log(err));
   });
