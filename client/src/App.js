@@ -2,9 +2,7 @@ import React from 'react';
 import moment from 'moment';
 import axios from 'axios';
 import Timeline from 'react-calendar-timeline/lib';
-import containerResizeDetector from 'react-calendar-timeline/lib/resize-detector/container';
 import SideBar from './components/sideBar';
-//import GroupColor from './components/groupColor';
 import ItemMenu from './components/itemMenu';
 import GroupMenu from './components/groupMenu';
 import AddGroupBtn from './components/addGroupBtn';
@@ -26,18 +24,11 @@ const keys = {
 
 export default class App extends React.Component {
   constructor (props) {
-    super(props)
-    const startDate = new Date().getTime();
-    const startValue = Math.floor(moment(startDate).valueOf() / 10000000) * 10000000;
-    const endValue = Math.floor(moment(startDate).valueOf() / 10000000) * 10000000 + 100000000 * 4;
+    super(props);
+    const defaultTimeStart = moment().add(-12, 'hour');
+    const defaultTimeEnd = moment().add(41, 'day');
 
-    const items = [];
-    const groups = [];
-    const deletedItems = [];
-    const deletedGroups = [];
-
-    const defaultTimeStart = moment().startOf('month').toDate();
-    const defaultTimeEnd = moment().startOf('month').add(41, 'day').toDate();
+    const { items, groups, deletedItems, deletedGroups } = [];
 
     this.state = {
       groups,
@@ -64,34 +55,32 @@ export default class App extends React.Component {
 
     const randomColor = () => {
       const rgb = [];
-      for(let i = 1; i <= 3; i++) {
+      for (let i = 1; i <= 3; i++) {
         rgb.push(Math.floor(Math.random() * 256));
       }
-     return `rgb(${rgb.join(',')})`;
+
+      return `rgb(${rgb.join(',')})`;
     };
 
     const newItemColorObj = {};
-
     const nextGroups = [];
 
     groups.forEach((group) => {
-      const {groupId, tip, title} = group;
-      const nextGroup = Object.assign({}, {tip, title});
+      const { groupId, tip, title } = group;
+      const nextGroup = Object.assign({}, { tip, title });
       nextGroup.color = randomColor();
-      //console.log(nextGroup.color);
       newItemColorObj[groupId] = nextGroup.color;
       nextGroup.id = groupId;
       nextGroups.push(nextGroup);
     });
-    console.log(nextGroups);
 
     const nextItems = [];
 
     items.forEach((item) => {
-      const {itemId, tip, title, start, group, end} = item;
-      const nextItem = Object.assign({}, {tip, title, start, group, end});
+      const { itemId, tip, title, start, group, end } = item;
+      const nextItem = Object.assign({}, { tip, title, start, group, end });
       nextItem.color = newItemColorObj[group];
-      console.log(nextItem.color);
+      // console.log(nextItem.color);
       nextItem.id = itemId;
       nextItems.push(nextItem);
     });
@@ -99,8 +88,8 @@ export default class App extends React.Component {
     const nextDeletedItems = [];
 
     deletedItems.forEach((deletedItem) => {
-      const {itemId, tip, title, start, group, end} = deletedItem;
-      const nextDeletedItem = Object.assign({}, {tip, title, start, group, end});
+      const { itemId, tip, title, start, group, end } = deletedItem;
+      const nextDeletedItem = Object.assign({}, { tip, title, start, group, end });
       nextDeletedItem.color = newItemColorObj[group];
       nextDeletedItem.id = itemId;
       nextDeletedItems.push(nextDeletedItem);
@@ -122,19 +111,18 @@ export default class App extends React.Component {
     const groupId = this.state.groups[this.currentRow].id
 
     let maxIndex = -1;
-    for (let i = 0; i < deletedItems.length; i++) {
-      const deletedItem = deletedItems[i];
+  
+    deletedItems.forEach((deletedItem) => {
       if (deletedItem.id * 1 > maxIndex) {
         maxIndex = deletedItem.id * 1;
       }
-    }
+    })
 
-    for (let i = 0; i < items.length; i++) {
-      const item = items[i];
+    items.forEach((item) => {
       if (item.id * 1 > maxIndex) {
         maxIndex = item.id * 1;
       }
-    }
+    })
 
     const newItem = {
       id: `${maxIndex + 1}`,
@@ -148,7 +136,7 @@ export default class App extends React.Component {
 
     axios.post('/addItem', newItem)
 
-    console.log(items)
+    // console.log(items)
     this.setState({
       items: [
         ...items,
@@ -161,19 +149,17 @@ export default class App extends React.Component {
     const { groups, deletedGroups } = this.state;
 
     let maxIndex = -1;
-    for (let i = 0; i < deletedGroups.length; i++) {
-      const deletedGroup = deletedGroups[i];
+    deletedGroups.forEach((deletedGroup) => {
       if (deletedGroup.id * 1 > maxIndex) {
         maxIndex = deletedGroup.id * 1;
       }
-    }
+    })
 
-    for (let i = 0; i < groups.length; i++) {
-      const group = groups[i];
+    groups.forEach((group) => {
       if (group.id * 1 > maxIndex) {
         maxIndex = group.id * 1;
       }
-    }
+    })
 
     let newGroup = {
       id: `${maxIndex + 1}`,
@@ -191,10 +177,10 @@ export default class App extends React.Component {
 
     axios.post('/addGroup', newGroup);
 
-    newGroup = Object.assign({}, newGroup, {color: randomColor()});
+    newGroup = Object.assign({}, newGroup, { color: randomColor() });
     const obj = {};
     obj[newGroup.id] = newGroup.color;
-    const newItemColorObj = Object.assign({}, this.state.itemColor, obj);
+    const newItemColorObj = Object.assign( {}, this.state.itemColor, obj );
 
     this.setState({
       groups: [
@@ -206,7 +192,7 @@ export default class App extends React.Component {
   }
 
   handleCanvasClick = (groupId, time, event) => {
-    console.log('Canvas clicked', groupId, time, event, this.currentRow);
+    // console.log('Canvas clicked', groupId, time, event, this.currentRow);
   }
 
   handleCanvasMove = (event) => {
@@ -217,7 +203,7 @@ export default class App extends React.Component {
   }
 
   handleCanvasContextMenu = (group, time, event) => {
-    console.log('Canvas context menu', group, time, event);
+    // console.log('Canvas context menu', group, time, event);
   }
 
   enterKeyPress = (clickEvent, itemId, currentTitle, event) => {
@@ -228,31 +214,31 @@ export default class App extends React.Component {
    if (event.keyCode === 13) {
       // REMOVE INPUT BOX ON ENTER
       const inputTitleValue = inputTitle.value || currentTitle.innerText;
-      console.log(currentTitle.innerText, typeof currentTitle.innerText)
-      console.log(inputTitle.value, typeof inputTitle.value)
+      // console.log(currentTitle.innerText, typeof currentTitle.innerText)
+      // console.log(inputTitle.value, typeof inputTitle.value)
 
-     inputTitle.parentNode.removeChild(inputTitle);
+      inputTitle.parentNode.removeChild(inputTitle);
       //this.inputNotShowing = true;
 
-     // SHOW CURRENTLY DISPLAYED TITLE
+      // SHOW CURRENTLY DISPLAYED TITLE
       currentTitle.style.display = "block";
       trashCan.style.display = "none";
 
-     // INSERT CHANGED TITLE INFO INTO ITEMS
+      // INSERT CHANGED TITLE INFO INTO ITEMS
       const items = this.state.items.slice(0);
 
-     for (let i = 0; i < items.length; i++) {
-        if (items[i].id === itemId) {
-          items[i].title = inputTitleValue;
+      items.forEach((item) => {
+        if (item.id === itemId) {
+          item.title = inputTitleValue;
         }
-      }
+      })
 
-     axios.post('/updateItemTitle', { itemId, inputTitleValue })
-      .then( () => console.log("Group added to DB"))
-      .catch( err => {throw err;} );
+      axios.post('/updateItemTitle', { itemId, inputTitleValue })
+        .then( () => console.log("Group added to DB"))
+        .catch( err => {throw err;} );
 
-     this.setState({ items });
-      // RESET CLICKED BEFORE
+      this.setState({ items });
+        // RESET CLICKED BEFORE
       this.clickedBefore = false;
     }
 
@@ -274,8 +260,8 @@ export default class App extends React.Component {
     const trashCanGroup = document.getElementById("groupMenu" + groupId);
 
     if (event.keyCode === 13) {
-      console.log(this.state.items)
-      console.log(currentTitle, copyCurrentTitle)
+      // console.log(this.state.items)
+      // console.log(currentTitle, copyCurrentTitle)
       inputTitle.parentNode.removeChild(inputTitle);
       currentTitle.innerText = inputTitleValue;
 
@@ -287,11 +273,9 @@ export default class App extends React.Component {
       const groups = this.state.groups.slice(0);
 
       let index;
-      for (let i = 0; i < groups.length; i++) {
-        const group = groups[i];
-        if (group.id === groupId) {
+      for (let i = 0; i < groups.length; i += 1) {
+        if (groups[i].id === groupId) {
           index = i;
-          break;
         }
       }
 
@@ -347,7 +331,7 @@ export default class App extends React.Component {
       //console.log(this.state.selectedItem.getBoundingClientRect());
     }
 
-    console.log('Clicked: ' + itemId);
+    // console.log('Clicked: ' + itemId);
   }
 
   handleGroupClick = (groupId, event) => {
@@ -363,9 +347,9 @@ export default class App extends React.Component {
       inputDOM.setAttribute( "id" , "inputGroup"); //id 가 고유가 아니다.
       inputDOM.setAttribute( "type", "text/javascipt" );
       inputDOM.value = `${currentTitle.innerText}`;
-      console.log(inputDOM.value)
+      // console.log(inputDOM.value)
       // HIDE ORIGINAL TITLE TO SHOW INPUT
-      console.log(event.currentTarget.childNodes[0])
+      // console.log(event.currentTarget.childNodes[0])
       trashCanGroup.style.display = "inline";
       currentTitle.innerText = '';
 
@@ -385,21 +369,20 @@ export default class App extends React.Component {
   }
 
   handleItemSelect = (itemId) => {
-    console.log('Selected: ' + itemId);
+    // console.log('Selected: ' + itemId);
   }
 
   handleItemToDeletedItems = (item) => {
     const { items, deletedItems } = this.state;
-    console.log(items)
+    // console.log(items)
     const updateDeletedItem = deletedItems.slice(0);
 
     updateDeletedItem.push(item)
     this.clickedBefore = false;
 
     let index;
-    for (let i = 0; i < items.length; i++) {
-      const eachItem = items[i];
-      if (eachItem.id === item.id) {
+    for (let i = 0; i < items.length; i += 1) {
+      if (items[i].id === item.id) {
         index = i;
       }
     }
@@ -407,7 +390,6 @@ export default class App extends React.Component {
     let newItems = items.slice(0);
     newItems.splice(index, 1);
 
-    //this.currentRow -= 1; //지울때 row 설정을 바꾸면?
     axios.post('/deleteItem', item)
 
     this.setState({
@@ -425,9 +407,8 @@ export default class App extends React.Component {
     this.groupClickedBefore = false;
 
     let index;
-    for (let i = 0; i < groups.length; i++) {
-      const eachGroup = groups[i];
-      if (eachGroup.id === group.id) {
+    for (let i = 0; i < groups.length; i += 1) {
+      if (groups[i].id === group.id) {
         index = i;
       }
     }
@@ -445,19 +426,19 @@ export default class App extends React.Component {
   }
 
   restoreDeletedItem = (item) => {
-    console.log("this is the item");
-    console.log(item);
+    // console.log("this is the item");
+    // console.log(item);
     const nextDeletedItems = this.state.deletedItems.slice(0);
     const nextItems = this.state.items.slice(0);
     for(let i = 0; i < nextDeletedItems.length; i++) {
       const deletedItem = nextDeletedItems[i];
-      if(deletedItem.id === item.id) {
-        nextItems.push(nextDeletedItems.splice(i,1)[0]);
+      if (deletedItem.id === item.id) {
+        nextItems.push(nextDeletedItems.splice(i, s1)[0]);
         break;
       }
     }
 
-   console.log(nextDeletedItems);
+  //  console.log(nextDeletedItems);
     axios.post('/restoreDeletedItem', { item })
       .then( () => console.log("restored added to DB"))
       .catch( err => {throw err;} );
@@ -468,7 +449,7 @@ export default class App extends React.Component {
   }
 
   handleItemContextMenu = (itemId) => {
-    console.log('Context Menu: ' + itemId);
+    // console.log('Context Menu: ' + itemId);
   }
 
   handleItemMove = (itemId, dragTime, newGroupOrder) => {
@@ -476,12 +457,13 @@ export default class App extends React.Component {
     const group = groups[newGroupOrder];
 
     let orderItem;
-    for (let i = 0; i < items.length; i++) {
-      if (items[i].id === itemId) {
-        orderItem = Object.assign({}, items[i], {group: group.id});
+    items.forEach((item) => {
+      if (item.id === itemId) {
+        orderItem = Object.assign({}, item, {group: group.id});
       }
-    }
-    console.log(orderItem)
+    })
+
+    // console.log(orderItem)
     axios.post('/changeGroupOrder', orderItem)
 
     this.setState({
@@ -496,25 +478,23 @@ export default class App extends React.Component {
         : item),
     })
 
-    console.log('Moved', itemId, dragTime, newGroupOrder)
+    // console.log('Moved', itemId, dragTime, newGroupOrder)
   }
 
   handleItemResize = (itemId, time, edge) => {
     const { items } = this.state;
 
-
     let resizedItem;
-    for (let i = 0; i < items.length; i++) {
-      if (items[i].id === itemId) {
-        resizedItem = Object.assign({}, items[i], {
-          start: edge === 'left' ? time : items[i].start,
-          end: edge === 'left' ? items[i].end : time,
+    items.forEach((item) => {
+      if (item.id === itemid) {
+        resizedItem = Object.assign({}, item, {
+          start: edge === 'left' ? time : item.start,
+          end: edge === 'left' ? item.end : time,
         });
       }
-    }
+    })
 
     axios.post('/resizedItem', resizedItem);
-
 
     this.setState({
       items: items.map(item =>
@@ -526,9 +506,8 @@ export default class App extends React.Component {
           : item)
     })
 
-    console.log('Resized', itemId, time, edge);
+    // console.log('Resized', itemId, time, edge);
   }
-  // 캔버스 전체를 다시 재구조 하는 함수
   handleTimeChange = (visibleTimeStart, visibleTimeEnd, updateScrollCanvas) => {
     if (visibleTimeStart < minTime && visibleTimeEnd > maxTime) {
       updateScrollCanvas(minTime, maxTime);
@@ -540,7 +519,6 @@ export default class App extends React.Component {
       updateScrollCanvas(visibleTimeStart, visibleTimeEnd);
     }
   }
-  // 현재 시간 이전으로 움직이는 것을 방지하는 함수
   // moveResizeValidator = (action, item, time, resizeEdge) => {
   //   if (time < new Date().getTime()) {
   //     const newTime = Math.ceil(new Date().getTime() / (15 * 60 * 1000)) * (15 * 60 * 1000);
@@ -567,7 +545,6 @@ export default class App extends React.Component {
   }
 
   groupRenderer = ({ group }) => {
-
     return (
       <div className="group-container">
         <span className="custom-grouspan" onClick={event => this.handleGroupClick(group.id, event)}>
@@ -590,7 +567,7 @@ export default class App extends React.Component {
       defaultTimeEnd
     } = this.state;
 
-    const checkIfGroupIsTooMany = groups.length < 11 ? 50 : 30;
+    const checkIfGroupIsTooMany = groups.length < 12 ? 35 : 25;
 
     return (
       <div>
@@ -616,8 +593,6 @@ export default class App extends React.Component {
 
                   sidebarWidth={150}
                   sidebarContent={<div className="userName" style={{textAlign:"center"}}>Category</div>} //username
-                  //rightSidebarWidth={150}
-                  //rightSidebarContent={<div>Above The Right</div>}
 
                   canMove
                   canResize='right'
@@ -629,8 +604,6 @@ export default class App extends React.Component {
                   itemHeightRatio={0.75}
 
                   showCursorLine
-
-                  resizeDetector={containerResizeDetector}
 
                   defaultTimeStart={defaultTimeStart}
                   defaultTimeEnd={defaultTimeEnd}
