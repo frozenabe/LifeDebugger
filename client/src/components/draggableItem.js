@@ -17,7 +17,7 @@ export default class DraggableItem extends Component {
       clientX,
       clientY,
     } = event;
-    this.setState({ //arrow를 사이드바에서 그냥 눌렀을 때 아무 반응이 없어야 함. 드래그해서 칸에 넣어야만 생김.
+    this.setState({
       outOfSidebarZone: false,
       isDragging: true,
       mouseX: clientX,
